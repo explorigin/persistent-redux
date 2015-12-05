@@ -1,0 +1,40 @@
+{
+  "name": "persistent-redux",
+  "version": "0.6.0",
+  "description": "Persist your Redux state with PouchDB",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/explorigin/persistent-redux.git"
+  },
+  "keywords": [
+    "redux",
+    "state",
+    "javascript",
+    "indexeddb",
+    "pouchdb",
+    "offline",
+    "sync"
+  ],
+  "author": "Timothy Farrell <tim@thecookiejar.me> (https://github.com/explorigin)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/explorigin/persistent-redux/issues"
+  },
+  "homepage": "https://github.com/explorigin/persistent-redux",
+  "dependencies": {
+    "pouchdb": "5.1.0",
+    "redux": "^3.0.4"
+  },
+  "devDependencies": {
+    "babel": "^5.5.8",
+    "babel-core": "^5.6.18",
+    "babel-eslint": "^4.1.0",
+    "babel-loader": "^5.1.4",
+    "eslint": "^1.7.1",
+    "webpack": "^1.9.6"
+  },
+}
