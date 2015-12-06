@@ -77,16 +77,11 @@ function extractAttachments(action) {
 	};
 }
 
-function persistenceMiddleware(db, options) {
-	const ignoredActionPrefixes = new Set();
-
-	let { startingSequence, ignoreActions } = options;
-	var sequence = startingSequence;
-
-	ignoreActions.forEach(ignoredActionPrefixes.add.bind(ignoredActionPrefixes));
+function persistenceMiddleware(options) {
+	var { db, startingSequence, ignoreAction } = options;
 
 	return (/* store */) => next => {
-		var ignoredActionQueue = [], waitingOnAsyncActions = 0;
+		var ignoredActionQueue = [], waitingOnAsyncActions = 0,	sequence = startingSequence;
 
 		return action => {
 			if (action.type === FEED_CHANGED) {
@@ -99,7 +94,7 @@ function persistenceMiddleware(db, options) {
 				if (!action.init) {
 					waitingOnAsyncActions--;
 				}
-			} else if (ignoredActionPrefixes.has(action.type.split('/')[0])) {
+			} else if (ignoreAction(action)) {
 				if (waitingOnAsyncActions) {
 					ignoredActionQueue.push(action);
 				} else {
@@ -127,7 +122,7 @@ function persistenceMiddleware(db, options) {
 	};
 }
 
-export default function persistentStore({ db, ignoreActions }) {
+export default function persistentStore({ db, ignoreAction }) {
 	var middleware, savedActions = [];
 
 	const createStoreWrapper = (createStore) => (reducer, initialState={}) => {
@@ -148,10 +143,10 @@ export default function persistentStore({ db, ignoreActions }) {
 	return db.info().then((info) => {
 		let { update_seq } = info;
 		middleware = persistenceMiddleware(
-			db,
 			{
+				db,
 				startingSequence: update_seq,
-				ignoreActions
+				ignoreAction
 			});
 		return db.put(DESIGN_DOC);
 	}).catch((err) => {
