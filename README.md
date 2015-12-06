@@ -57,7 +57,7 @@ new PouchDB('AppState', {storage: 'persistent'})
 
 ### ignoreAction
 
-`ignoreAction` is a function that returns a boolean if an action should be persisted.
+`ignoreAction` is a function that returns a boolean if an action should bypass persistence.
 
 ### blobSupport
 
