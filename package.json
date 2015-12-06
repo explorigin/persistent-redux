@@ -4,6 +4,7 @@
   "description": "Persist your Redux state with PouchDB",
   "main": "src/index.js",
   "scripts": {
+    "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -35,6 +36,7 @@
     "babel-eslint": "^4.1.0",
     "babel-loader": "^5.1.4",
     "eslint": "^1.7.1",
+    "eslint-plugin-react": "~3.5.1",
     "webpack": "^1.9.6"
   },
 }
