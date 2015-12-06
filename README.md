@@ -20,7 +20,7 @@ import persistentStore from './middlewares/persistentStore';
 
 const options = {
 	db: new PouchDB('AppState', {storage: 'persistent'}),
-	ignoreActions: (() => true),
+	ignoreAction: (() => true),
 	blobSupport: true
 };
 
@@ -47,12 +47,17 @@ persistentStore(options).then((persistentMiddleware) => {
 ## Options
 
 ### db
-Persistent-Redux uses [PouchDB](http://pouchdb.com/) as its back-end.  Pass in the PouchDB database that you wish to use for persistence.
-It's recommended to specify [persistent storage for Firefox](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Browser_storage_limits_and_eviction_criteria).  PouchDB allows this through the ([currently undocumented](https://github.com/pouchdb/pouchdb/issues/4315)) `storage` option like `new PouchDB('AppState', {storage: 'persistent'})`.
+The [PouchDB](http://pouchdb.com/) database instance that you wish to use for persistence.
 
-### ignoreActions
+When building your PouchDB instance, it's recommended to specify [persistent storage for Firefox](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Browser_storage_limits_and_eviction_criteria).  PouchDB allows this through the ([currently undocumented](https://github.com/pouchdb/pouchdb/issues/4315)) `storage` option like:
 
-`ignoreActions` is a function that returns a boolean if an action should be persisted.
+```
+new PouchDB('AppState', {storage: 'persistent'})
+```
+
+### ignoreAction
+
+`ignoreAction` is a function that returns a boolean if an action should be persisted.
 
 ### blobSupport
 
@@ -93,18 +98,19 @@ Because most I/O is asynchronous, the persistent store is also asynchronous. The
 3. Return a middleware function that will apply the initial state to the created store and capture actions.
 
 When an action is dispatched to the wrapped store:
+
 1. The persistent middleware will serialize and save the action.
 2. When the action is saved, the changes feed will report back to the middleware which will re-dispatch the action to propagate to other middlewares and eventually the reducers to change the current state.  If PouchDB is a remote database, this could slow down the interaction of your app.
 
-### [Redux-Router](https://github.com/rackt/redux-router)
+### Using with Redux-Router
 
 It is not recommended to use Persistent-Redux with [Redux-Router](https://github.com/rackt/redux-router) at this time because it [includes unserializable functions in its actions](https://github.com/rackt/redux-router/issues/105).  Until this is rectified, these actions cannot be persistent.
 
-If you still wish to use Redux-Router, filter out its actions by setting `ignoreActions` to bypass them:
+If you still wish to use Redux-Router, filter out its actions in the ignoreAction function:
 
 ```
 {
-	ignoreActions: (action) => action.type.indexOf('@@reduxReactRouter') === 0
+	ignoreAction: (action) => action.type.indexOf('@@reduxReactRouter') === 0
 }
 ```
 
@@ -114,5 +120,5 @@ There are some things remaining:
 
 - 0.7.0 - factor out blob support
 - 0.8.0 - squash actions into an initial state
-- 0.9.0 - add optimistic dispatching
+- 0.9.0 - add synchronous dispatching
 - 1.0.0 - test coverage
