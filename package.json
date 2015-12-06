@@ -2,10 +2,19 @@
   "name": "persistent-redux",
   "version": "0.6.0",
   "description": "Persist your Redux state with PouchDB",
-  "main": "src/index.js",
+  "main": "lib/index.js",
+  "jsnext:main": "src/index.js",
+  "files": [
+    "dist",
+    "lib",
+    "src"
+  ],
   "scripts": {
     "lint": "eslint src",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:lib": "babel src --out-dir lib",
+    "build:umd": "webpack src/index.js dist/persistent-redux.js --config webpack.config.development.js",
+    "build:umd:min": "webpack src/index.js dist/persistent-redux.min.js --config webpack.config.production.js",
+    "build": "npm run build:lib && npm run build:umd && npm run build:umd:min"
   },
   "repository": {
     "type": "git",
@@ -39,4 +48,13 @@
     "eslint-plugin-react": "~3.5.1",
     "webpack": "^1.9.6"
   },
+  "npmName": "persistent-redux",
+  "npmFileMap": [
+    {
+      "basePath": "/dist/",
+      "files": [
+        "*.js"
+      ]
+    }
+  ]
 }
