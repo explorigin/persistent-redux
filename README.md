@@ -1,6 +1,8 @@
 # Persistent-Redux
 
-Persistent-Redux will save your Redux state to a [PouchDB](http://pouchdb.com/) instance and restore it on the next page load.
+Persistent-Redux is a drop-in middleware that will save your Redux state to a [PouchDB](http://pouchdb.com/) instance and restore it on the next page load.
+
+There are other utilities that bridge between Redux and PouchDB but they require a deeper level of code integration (special actions, wrapping components, etc.).
 
 ## Installation
 
