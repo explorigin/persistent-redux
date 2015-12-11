@@ -45,8 +45,6 @@ new PouchDB([db name string], {storage: 'persistent'});
 
 #### blobSupport
 
-**Currently forced to `true`.  Version 0.7.0 will allow for false.***
-
 `blobSupport` is a boolean (default to `false`) that enables support for saving Blobs as members of actions.  If you wish to support Blobs:
 
 1. Set `blobSupport: true`
@@ -105,7 +103,6 @@ Because PouchDB backends are asynchronous, the persistent store is also asynchro
 
 There are some things remaining:
 
-- 0.7.0 - factor out blob support
 - 0.8.0 - squash actions into an initial state
 - 0.9.0 - add synchronous dispatching
 - 1.0.0 - test coverage

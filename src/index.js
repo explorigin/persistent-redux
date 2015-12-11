@@ -78,7 +78,7 @@ function extractAttachments(action) {
 }
 
 function persistenceMiddleware(options) {
-	var { db, startingSequence, ignoreAction } = options;
+	var { db, startingSequence, ignoreAction, blobSupport } = options;
 
 	return (/* store */) => next => {
 		var ignoredActionQueue = [], waitingOnAsyncActions = 0,	sequence = startingSequence;
@@ -104,7 +104,12 @@ function persistenceMiddleware(options) {
 				// TODO - detect unserializable actions in DEBUG mode
 				sequence++;
 				waitingOnAsyncActions++;
-				const { payload, attachments } = extractAttachments(action);
+				if (blobSupport) {
+					var { payload, attachments } = extractAttachments(action);
+				} else {
+					payload = action;
+					attachments = null;
+				}
 				let doc = {
 					_id: `RA-${sequence}`,
 					type: REDUX_ACTION_TYPE,
@@ -122,8 +127,10 @@ function persistenceMiddleware(options) {
 	};
 }
 
-export default function persistentStore({ db, ignoreAction }) {
+export default function persistentStore({ db, ignoreAction, blobSupport }) {
 	var middleware, savedActions = [];
+
+	blobSupport = blobSupport === undefined ? false : blobSupport;
 
 	const createStoreWrapper = (createStore) => (reducer, initialState={}) => {
 		let store = applyMiddleware(middleware)(createStore)(reducer, initialState);
@@ -133,8 +140,8 @@ export default function persistentStore({ db, ignoreAction }) {
 			live: true,
 			include_docs: true,
 			since: 'now',
-			attachments: true,
-			binary: true
+			attachments: blobSupport,
+			binary: blobSupport
 		}).on('change', dispatchSavedActionToStore.bind(null, store, false));
 
 		return store;
@@ -146,7 +153,8 @@ export default function persistentStore({ db, ignoreAction }) {
 			{
 				db,
 				startingSequence: update_seq,
-				ignoreAction
+				ignoreAction,
+				blobSupport
 			});
 		return db.put(DESIGN_DOC);
 	}).catch((err) => {
@@ -155,7 +163,7 @@ export default function persistentStore({ db, ignoreAction }) {
 	}).then(() => {
 		return db.query(
 			'fetchReduxActionHistory',
-			{include_docs: true, attachments: true, binary: true}
+			{include_docs: true, attachments: blobSupport, binary: blobSupport}
 		);
 	}).then((result) => {
 		console.info(`Found ${result.total_rows} saved action(s).`);
