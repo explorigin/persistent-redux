@@ -25,7 +25,7 @@ import persistentStore from 'persistent-redux';
 ```es6
 const options = {
 	db: new PouchDB('AppState', {storage: 'persistent'}),
-	ignoreAction: (() => true),
+	actionFilter: (() => true),
 	blobSupport: true,
 	synchronous: true
 };
@@ -40,9 +40,9 @@ When building your PouchDB instance, it's recommended to specify [persistent sto
 new PouchDB([db name string], {storage: 'persistent'});
 ```
 
-#### ignoreAction
+#### actionFilter
 
-`ignoreAction` should be a pure function that returns a boolean if an action should bypass persistence.
+`actionFilter` should be a pure function that returns a boolean if an action is persistent.
 
 #### blobSupport
 
@@ -94,7 +94,7 @@ persistentStore(options).then((persistentMiddleware) => {
 
 ### Supported Data-types
 
-Persistent-Redux supports all of the same [data-types that PouchDB supports](http://pouchdb.com/faq.html#data_types).  Some Redux tools (most notably [Redux-Router](https://github.com/rackt/redux-router/issues/105)) use unsupported data-types in their actions.  These actions cannot be persisted and must be filtered with the ignoreAction function.
+Persistent-Redux supports all of the same [data-types that PouchDB supports](http://pouchdb.com/faq.html#data_types).  Some Redux tools (most notably [Redux-Router](https://github.com/rackt/redux-router/issues/105)) use unsupported data-types in their actions.  These actions cannot be persisted and must be filtered by the actionFilter function.
 
 ### Asynchronous Process
 

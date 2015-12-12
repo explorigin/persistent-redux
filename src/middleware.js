@@ -39,7 +39,9 @@ export function extractAttachments(action) {
 }
 
 export default function persistenceMiddleware(options) {
-	var { db, startingSequence, ignoreAction, blobSupport, synchronous } = options;
+	var { db, startingSequence, actionFilter, blobSupport, synchronous } = options;
+
+	actionFilter = actionFilter === undefined ? function() { return false; } : actionFilter;
 
 	return (/* store */) => next => {
 		var ignoredActionQueue = [], waitingOnAsyncActions = 0,	sequence = startingSequence;
@@ -55,7 +57,7 @@ export default function persistenceMiddleware(options) {
 				if (!action.init) {
 					waitingOnAsyncActions--;
 				}
-			} else if (ignoreAction(action)) {
+			} else if (!actionFilter(action)) {
 				if (waitingOnAsyncActions) {
 					ignoredActionQueue.push(action);
 				} else {
