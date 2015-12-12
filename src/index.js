@@ -78,7 +78,7 @@ function extractAttachments(action) {
 }
 
 function persistenceMiddleware(options) {
-	var { db, startingSequence, ignoreAction, blobSupport } = options;
+	var { db, startingSequence, ignoreAction, blobSupport, synchronous } = options;
 
 	return (/* store */) => next => {
 		var ignoredActionQueue = [], waitingOnAsyncActions = 0,	sequence = startingSequence;
@@ -122,28 +122,33 @@ function persistenceMiddleware(options) {
 					console.log('Could not serialize action: ', action);
 					console.log(err);
 				});
+				if (synchronous) {
+					next(action);
+				}
 			}
 		};
 	};
 }
 
-export default function persistentStore({ db, ignoreAction, blobSupport }) {
+export default function persistentStore({ db, ignoreAction, blobSupport, synchronous }) {
 	var middleware, savedActions = [];
 
 	blobSupport = blobSupport === undefined ? false : blobSupport;
+	synchronous = synchronous === undefined ? false : synchronous;
 
 	const createStoreWrapper = (createStore) => (reducer, initialState={}) => {
 		let store = applyMiddleware(middleware)(createStore)(reducer, initialState);
 		savedActions.forEach(dispatchSavedActionToStore.bind(null, store, true));
 
-		db.changes({
-			live: true,
-			include_docs: true,
-			since: 'now',
-			attachments: blobSupport,
-			binary: blobSupport
-		}).on('change', dispatchSavedActionToStore.bind(null, store, false));
-
+		if (!synchronous) {
+			db.changes({
+				live: true,
+				include_docs: true,
+				since: 'now',
+				attachments: blobSupport,
+				binary: blobSupport
+			}).on('change', dispatchSavedActionToStore.bind(null, store, false));
+		}
 		return store;
 	};
 
@@ -154,7 +159,8 @@ export default function persistentStore({ db, ignoreAction, blobSupport }) {
 				db,
 				startingSequence: update_seq,
 				ignoreAction,
-				blobSupport
+				blobSupport,
+				synchronous
 			});
 		return db.put(DESIGN_DOC);
 	}).catch((err) => {

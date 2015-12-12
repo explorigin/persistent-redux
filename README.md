@@ -26,7 +26,8 @@ import persistentStore from 'persistent-redux';
 const options = {
 	db: new PouchDB('AppState', {storage: 'persistent'}),
 	ignoreAction: (() => true),
-	blobSupport: true
+	blobSupport: true,
+	synchronous: true
 };
 ```
 
@@ -65,6 +66,9 @@ new PouchDB([db name string], {storage: 'persistent'});
 		};
 	}
 	```
+#### synchronous
+
+`synchronous` is a boolean (default to `false`) that when `true` passively save the action without interrupting it asynchronously.
 
 ### Initialization
 ```es6
@@ -103,6 +107,5 @@ Because PouchDB backends are asynchronous, the persistent store is also asynchro
 
 There are some things remaining:
 
-- 0.8.0 - squash actions into an initial state
-- 0.9.0 - add synchronous dispatching
+- 0.9.0 - squash actions into an initial state
 - 1.0.0 - test coverage
