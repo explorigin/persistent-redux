@@ -107,5 +107,5 @@ Because PouchDB backends are asynchronous, the persistent store is also asynchro
 
 There are some things remaining:
 
-- 0.9.0 - squash actions into an initial state
+- 0.9.1 - document squash actions into an initial state
 - 1.0.0 - test coverage
