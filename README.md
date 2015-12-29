@@ -89,6 +89,22 @@ persistentStore(options).then((persistentMiddleware) => {
 });
 ```
 
+### Squashing Actions
+
+Redux stores application state as a function of `actions` and thus persistent-redux stores each of these actions.  However, building the current state by running through a large set of actions can unnecessarily delay startup time.  Persistent-Redux provides a utility function called `squashActions` that will squash all existing actions into a starting state that will be read at the next startup time and thus have fewer actions to reduce. Use it like this:
+
+```es6
+import { squashActions } from persistent-redux;
+
+squashActions(db, reducer).then((results) => {
+	// ... successful
+	// `results` is the pouchdb response from the bulkDocs command that deletes action documents and sets/updates the initial state document.
+}).catch((err) => {
+  // ... any pouchdb errors will show up here
+})
+```
+
+NOTE: You may also wish to run `db.compact()` after successfully squashing actions to maintain the database size.
 
 ## Notes
 
@@ -107,5 +123,4 @@ Because PouchDB backends are asynchronous, the persistent store is also asynchro
 
 There are some things remaining:
 
-- 0.9.1 - document squash actions into an initial state
 - 1.0.0 - test coverage

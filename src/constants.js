@@ -1,5 +1,4 @@
 export const FEED_CHANGED = '@@persistentStore/feedChanged';
-export const SQUASH_ACTIONS = '@@persistentStore/squashActions';
 export const REDUX_ACTION_TYPE = 'reduxAction';
 export const INITIAL_STATE_TYPE = 'initialReduxState';
 export const DESIGN_DOC = {

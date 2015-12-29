@@ -1,4 +1,4 @@
-import { FEED_CHANGED, SQUASH_ACTIONS, REDUX_ACTION_TYPE, INITIAL_STATE_TYPE } from './constants.js';
+import { FEED_CHANGED, REDUX_ACTION_TYPE } from './constants.js';
 
 export function replaceAttachments(record) {
 	let attachments = record.doc._attachments;
@@ -61,9 +61,7 @@ export function persistenceMiddleware(options) {
 		startingSequence,
 		actionFilter,
 		blobSupport,
-		synchronous,
-		getStartState,
-		getReducer
+		synchronous
 	} = options;
 
 	actionFilter = actionFilter === undefined ? (() => false) : actionFilter;
@@ -82,32 +80,6 @@ export function persistenceMiddleware(options) {
 				if (!action.init) {
 					waitingOnAsyncActions -= 1;
 				}
-			} else if (action.type === SQUASH_ACTIONS) {
-				waitingOnAsyncActions += 1;
-				getStartState().then(({ state, actions, docs }) => {
-					let newState = {
-						...actions.reduce(getReducer(), state),
-						_id: state._id || INITIAL_STATE_TYPE,
-						_rev: state._rev
-					};
-					console.info(`Squashing ${actions.length} saved action(s).`);
-					let removeDocs = docs.map((record) => {
-						return {
-							...record.doc,
-							_deleted: true
-						};
-					});
-					removeDocs.push(newState);
-					return db.bulkDocs(removeDocs);
-				}).then(() => {
-					return db.compact();
-				}).catch((err) => {
-					waitingOnAsyncActions -=1;
-					console.error(`Error squashing:`, err);
-					throw err;
-				}).then(() => {
-					waitingOnAsyncActions -= 1;
-				});
 			} else if (!actionFilter(action)) {
 				if (waitingOnAsyncActions) {
 					ignoredActionQueue.push(action);

@@ -34,7 +34,7 @@ function getStartState(db, blobSupport) {
 }
 
 export function persistentStore({ db, actionFilter, blobSupport, synchronous }) {
-	var middleware, savedState = null, _reducer = (state/*, action */) => state;
+	var middleware, savedState = null;
 
 	blobSupport = blobSupport === undefined ? false : blobSupport;
 	synchronous = synchronous === undefined ? false : synchronous;
@@ -47,8 +47,6 @@ export function persistentStore({ db, actionFilter, blobSupport, synchronous }) 
 			firstState = {};
 		}
 		let store = applyMiddleware(middleware)(createStore)(reducer, initialState || firstState);
-
-		_reducer = reducer;
 
 		if (!synchronous) {
 			db.changes({
@@ -69,9 +67,7 @@ export function persistentStore({ db, actionFilter, blobSupport, synchronous }) 
 			startingSequence: update_seq,
 			actionFilter,
 			blobSupport,
-			synchronous,
-			getStartState: getStartState.bind(null, db, blobSupport),
-			getReducer: function() { return _reducer; }
+			synchronous
 		});
 		return db.put(DESIGN_DOC);
 	}).catch((err) => {
@@ -87,7 +83,6 @@ export function persistentStore({ db, actionFilter, blobSupport, synchronous }) 
 		if (result.docs.length) {
 			console.info(`Applying ${result.docs.length} saved action(s).`);
 		}
-
 		return createStoreWrapper;
 	}).catch((err) => {
 		if (err.message === 'missing') {
@@ -95,5 +90,24 @@ export function persistentStore({ db, actionFilter, blobSupport, synchronous }) 
 			return createStoreWrapper;
 		}
 		console.error(err);
+	});
+}
+
+export function squashActions(db, reducer) {
+	getStartState(db, true).then(({ state, actions, docs }) => {
+		let newState = {
+			...actions.reduce(reducer, state),
+			_id: state._id || INITIAL_STATE_TYPE,
+			_rev: state._rev
+		};
+		console.info(`Squashing ${actions.length} saved action(s).`);
+		let removeDocs = docs.map((record) => {
+			return {
+				...record.doc,
+				_deleted: true
+			};
+		});
+		removeDocs.push(newState);
+		return db.bulkDocs(removeDocs);
 	});
 }
