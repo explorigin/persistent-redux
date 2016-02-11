@@ -1,6 +1,6 @@
 {
   "name": "persistent-redux",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Persist your Redux state with PouchDB",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
@@ -28,6 +28,7 @@
     "javascript",
     "indexeddb",
     "pouchdb",
+    "couchdb",
     "offline",
     "sync"
   ],

@@ -7,7 +7,7 @@ module.exports = {
     ]
   },
   output: {
-    library: 'Rersistent-Redux',
+    library: 'Persistent-Redux',
     libraryTarget: 'umd'
   },
   resolve: {

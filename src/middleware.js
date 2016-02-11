@@ -1,4 +1,4 @@
-import { FEED_CHANGED, REDUX_ACTION_TYPE } from './constants.js';
+import { FEED_CHANGED, REDUX_ACTION_TYPE, REDUX_ACTION_SUFFIX } from './constants.js';
 
 export function replaceAttachments(record) {
 	let attachments = record.doc._attachments;
@@ -96,7 +96,7 @@ export function persistenceMiddleware(options) {
 					attachments = null;
 				}
 				let doc = {
-					_id: `RA-${sequence}`,
+					_id: sequence.toString(36) + REDUX_ACTION_SUFFIX,
 					type: REDUX_ACTION_TYPE,
 					payload: payload
 				};

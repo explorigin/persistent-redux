@@ -12,6 +12,10 @@ function dispatchSavedActionToStore(store, init, record) {
 	}
 }
 
+function compareReduxActions(a, b) {
+	return a.localeCompare(b);
+}
+
 function getStartState(db, blobSupport) {
 	var state;
 
@@ -27,7 +31,7 @@ function getStartState(db, blobSupport) {
 	}).then((result) => {
 		return {
 			state: state,
-			actions: result.rows.map(replaceAttachments),
+			actions: result.rows.sort(compareReduxActions).map(replaceAttachments),
 			docs: result.rows
 		};
 	});
