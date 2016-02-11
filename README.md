@@ -27,7 +27,8 @@ const options = {
 	db: new PouchDB('AppState', {storage: 'persistent'}),
 	actionFilter: (() => true),
 	blobSupport: true,
-	synchronous: true
+	synchronous: true,
+	actionSuffix: "-RA"
 };
 ```
 
@@ -69,6 +70,10 @@ new PouchDB([db name string], {storage: 'persistent'});
 #### synchronous
 
 `synchronous` is a boolean (default to `false`) that when `true` passively save the action without interrupting it asynchronously.
+
+#### actionSuffix
+
+`actionSuffix` is a string (default to `-RA`) that is appended to PouchDB record IDs.  Specifying this allows using the same database for multiple applications.
 
 ### Initialization
 ```es6

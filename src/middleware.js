@@ -1,4 +1,8 @@
-import { FEED_CHANGED, REDUX_ACTION_TYPE, REDUX_ACTION_SUFFIX } from './constants.js';
+import { FEED_CHANGED, REDUX_ACTION_TYPE } from './constants.js';
+
+export function defaultsTo(a, defaultValue, conditional) {
+	return a === conditional ? defaultValue : a;
+}
 
 export function replaceAttachments(record) {
 	let attachments = record.doc._attachments;
@@ -61,10 +65,12 @@ export function persistenceMiddleware(options) {
 		startingSequence,
 		actionFilter,
 		blobSupport,
-		synchronous
+		synchronous,
+		actionSuffix
 	} = options;
 
-	actionFilter = actionFilter === undefined ? (() => false) : actionFilter;
+	actionFilter = defaultsTo(actionFilter, (() => false));
+	actionSuffix = defaultsTo(actionSuffix, '-RA');
 
 	return (/* store */) => next => {
 		var ignoredActionQueue = [], waitingOnAsyncActions = 0,	sequence = startingSequence;
@@ -96,7 +102,7 @@ export function persistenceMiddleware(options) {
 					attachments = null;
 				}
 				let doc = {
-					_id: sequence.toString(36) + REDUX_ACTION_SUFFIX,
+					_id: sequence.toString(36) + actionSuffix,
 					type: REDUX_ACTION_TYPE,
 					payload: payload
 				};

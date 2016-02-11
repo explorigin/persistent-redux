@@ -1,6 +1,6 @@
 import { applyMiddleware } from 'redux';
 import { FEED_CHANGED, DESIGN_DOC, INITIAL_STATE_TYPE } from './constants.js';
-import { persistenceMiddleware, replaceAttachments } from './middleware.js';
+import { persistenceMiddleware, replaceAttachments, defaultsTo } from './middleware.js';
 
 function dispatchSavedActionToStore(store, init, record) {
 	if (!record._deleted && record.id !== INITIAL_STATE_TYPE) {
@@ -13,7 +13,7 @@ function dispatchSavedActionToStore(store, init, record) {
 }
 
 function compareReduxActions(a, b) {
-	return a.localeCompare(b);
+	return a.id.localeCompare(b.id);
 }
 
 function getStartState(db, blobSupport) {
@@ -37,11 +37,11 @@ function getStartState(db, blobSupport) {
 	});
 }
 
-export function persistentStore({ db, actionFilter, blobSupport, synchronous }) {
+export function persistentStore({ db, actionFilter, blobSupport, synchronous, actionSuffix }) {
 	var middleware, savedState = null;
 
-	blobSupport = blobSupport === undefined ? false : blobSupport;
-	synchronous = synchronous === undefined ? false : synchronous;
+	blobSupport = defaultsTo(blobSupport, false);
+	synchronous = defaultsTo(synchronous, false);
 
 	const createStoreWrapper = (createStore) => (reducer, firstState=null) => {
 		let initialState = savedState.actions.reduce(reducer, savedState.state);
@@ -71,7 +71,8 @@ export function persistentStore({ db, actionFilter, blobSupport, synchronous }) 
 			startingSequence: update_seq,
 			actionFilter,
 			blobSupport,
-			synchronous
+			synchronous,
+			actionSuffix
 		});
 		return db.put(DESIGN_DOC);
 	}).catch((err) => {
