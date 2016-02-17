@@ -80,22 +80,25 @@ export function persistentStore({ db, actionFilter, blobSupport, synchronous, ac
 		// ignore if doc already exists
 	}).then(() => {
 		return getStartState(db, blobSupport);
-	}).then((result) => {
-		savedState = result;
-		if (result.state) {
-			console.info(`Found saved initialState:`, result.state);
-		}
-		if (result.docs.length) {
-			console.info(`Applying ${result.docs.length} saved action(s).`);
-		}
-		return createStoreWrapper;
-	}).catch((err) => {
-		if (err.message === 'missing') {
-			console.info('Could not find saved state.');
+	}).then(
+		(result) => {
+			savedState = result;
+			if (result.state) {
+				console.info(`Found saved initialState:`, result.state);
+			}
+			if (result.docs.length) {
+				console.info(`Applying ${result.docs.length} saved action(s).`);
+			}
 			return createStoreWrapper;
+		},
+		(err) => {
+			if (err.message === 'missing') {
+				console.info('Could not find saved state.');
+				return createStoreWrapper;
+			}
+			throw err;
 		}
-		console.error(err);
-	});
+	);
 }
 
 export function squashActions(db, reducer) {
