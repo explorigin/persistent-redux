@@ -24,11 +24,11 @@ import persistentStore from 'persistent-redux';
 ### Options
 ```es6
 const options = {
-	db: new PouchDB('AppState', {storage: 'persistent'}),
-	actionFilter: (() => true),
-	blobSupport: true,
-	synchronous: true,
-	actionSuffix: "-RA"
+    db: new PouchDB('AppState', {storage: 'persistent'}),
+    actionFilter: (() => true),
+    blobSupport: true,
+    synchronous: true,
+    actionSuffix: "-RA"
 };
 ```
 
@@ -52,21 +52,21 @@ new PouchDB([db name string], {storage: 'persistent'});
 1. Set `blobSupport: true`
 2. Add an `_attachments` property in your action as a list of strings of object paths to the Blobs.  For example (type annotations added for clarity):
 
-	```es6
-	const REGISTER_PARTY = "party_on";
+    ```es6
+    const REGISTER_PARTY = "party_on";
 
-	function throwAParty(occasion: String, location: String, clipartImage: Blob) {
-		return {
-			type: REGISTER_PARTY,
-			payload: {
-				occasion,
-				location,
-				clipart: clipartImage
-			},
-			_attachments: ['payload.clipart']
-		};
-	}
-	```
+    function throwAParty(occasion: String, location: String, clipartImage: Blob) {
+        return {
+            type: REGISTER_PARTY,
+            payload: {
+                occasion,
+                location,
+                clipart: clipartImage
+            },
+            _attachments: ['payload.clipart']
+        };
+    }
+    ```
 #### synchronous
 
 `synchronous` is a boolean (default to `false`) that when `true` passively save the action without interrupting it asynchronously.
@@ -80,17 +80,17 @@ new PouchDB([db name string], {storage: 'persistent'});
 import { createStore, compose } from 'redux';
 
 persistentStore(options).then((persistentMiddleware) => {
-	const createStoreWithMiddleware = compose(
-		persistentMiddleware,
+    const createStoreWithMiddleware = compose(
+        persistentMiddleware,
     // ... other middlewares ...
-	)(createStore);
+    )(createStore);
 
-	let store = createStoreWithMiddleware(RootReducer);
+    let store = createStoreWithMiddleware(RootReducer);
 
-	// ... use your store as you normally would here...
+    // ... use your store as you normally would here...
 }).catch((err) => {
-	alert('Could not initialize persistent middleware.');
-	console.error(err);
+    alert('Could not initialize persistent middleware.');
+    console.error(err);
 });
 ```
 
@@ -102,8 +102,8 @@ Redux stores application state as a function of `actions` and thus persistent-re
 import { squashActions } from persistent-redux;
 
 squashActions(db, reducer).then((results) => {
-	// ... successful
-	// `results` is the pouchdb response from the bulkDocs command that deletes action documents and sets/updates the initial state document.
+    // ... successful
+    // `results` is the pouchdb response from the bulkDocs command that deletes action documents and sets/updates the initial state document.
 }).catch((err) => {
   // ... any pouchdb errors will show up here
 })
