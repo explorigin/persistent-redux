@@ -24,16 +24,19 @@ import { PouchDBAdapter } from 'persistent-redux/lib/adapters';
 
 ### Options
 ```es6
-const db = new PouchDB('AppState', {storage: 'persistent'});
+const adapter = new PouchDBAdapter(
+    new PouchDB('AppState', {storage: 'persistent'}),
+    { blobSupport: true }
+);
 const options = {
-    adapter: new adapters.PouchDBAdapter(db, { blobSupport: true }),
+    adapter: adapter,
     actionFilter: ((action) => action.type.indexOf('@@reduxReactRouter') !== 0),
     synchronous: true,
 };
 ```
 
 #### adapter
-An adapter instance to wrap any storage.  See [Available Adapters](#available-adapters) below.
+An adapter instance to wrap any storage.  See the [Available Adapters](#available-adapters) section below.
 
 #### actionFilter
 
@@ -64,7 +67,7 @@ persistentStore(options).then((persistentMiddleware) => {
 
 ### Squashing Actions
 
-Redux stores application state as a function of `actions` and thus persistent-redux stores each of these actions.  However, building the current state by running through a large sequence of actions can unnecessarily delay startup time.  Each storage adapter for Persistent-Redux provides a utility method called `squashActions` that will squash all existing actions into a starting state that will be read at the next startup time and thus have fewer actions to reduce. Use it like this:
+Redux stores application state as a function of `actions` and thus persistent-redux stores each of these actions.  However, building the current state by running through a large sequence of actions can unnecessarily delay startup time.  Each storage adapter provides a utility method called `squashActions` that will squash all existing actions into a starting state that will be read at the next startup time and thus have fewer actions to reduce. Use it like this:
 
 ```es6
 adapter.squashActions(rootReducer).then(() => {
@@ -95,40 +98,40 @@ const adapter = new PouchDBAdapter(
 );
 ```
 
+The PouchDBAdapter supports all of the same [data-types that PouchDB supports](http://pouchdb.com/faq.html#data_types).
+
 #### Adapter Options
 
-#### initialState
+* initialState
 
-`initialState` is the state (default to `{}`) to use in the event there there is nothing stored already in the database.
+    `initialState` is the state (default to `{}`) to use in the event there there is nothing stored already in the database.
 
-#### actionSuffix
+* actionSuffix
 
-`actionSuffix` is a string (default to `-RA`) that is appended to PouchDB record IDs.  Specifying this allows using the same database for multiple applications.
+    `actionSuffix` is a string (default to `-RA`) that is appended to PouchDB record IDs.  Specifying this allows using the same database for multiple applications.
 
-##### blobSupport
+* blobSupport
 
-`blobSupport` is a boolean (default to `false`) that enables support for saving Blobs as members of actions.  Setting this to `true` can slow down your app since large blobs will be stored, or potentially sent to a server, before the action is propagated back to Redux.  Consider using the `synchronous` option of persistent-redux to mitigate this.  If you wish to support Blobs:
+    `blobSupport` is a boolean (default to `false`) that enables support for saving Blobs as members of actions.  Setting this to `true` can slow down your app since large blobs will be stored, or potentially sent to a server, before the action is propagated back to Redux.  Consider using the [synchronous](#synchronous) option of persistent-redux to mitigate this.  If you wish to support Blobs:
 
-1. Set `blobSupport: true`
-2. Add an `_attachments` property in your action as a list of strings of object paths to the Blobs.  For example (type annotations added for clarity):
+    1. Set `blobSupport: true`
+    2. Add an `_attachments` property in your action as a list of strings of object paths to the Blobs.  For example (type annotations added for clarity):
 
-    ```es6
-    const REGISTER_PARTY = "party_on";
+        ```es6
+        const REGISTER_PARTY = "party_on";
 
-    function throwAParty(occasion: String, location: String, clipartImage: Blob) {
-        return {
-            type: REGISTER_PARTY,
-            payload: {
-                occasion,
-                location,
-                clipart: clipartImage
-            },
-            _attachments: ['payload.clipart']
-        };
-    }
-    ```
-
-The PouchDBAdapter supports all of the same [data-types that PouchDB supports](http://pouchdb.com/faq.html#data_types).  
+        function throwAParty(occasion: String, location: String, clipartImage: Blob) {
+            return {
+                type: REGISTER_PARTY,
+                payload: {
+                    occasion,
+                    location,
+                    clipart: clipartImage
+                },
+                _attachments: ['payload.clipart']
+            };
+        }
+        ```
 
 ## Notes
 
