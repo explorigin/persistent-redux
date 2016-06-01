@@ -1,79 +1,17 @@
-import { FEED_CHANGED, REDUX_ACTION_TYPE } from './constants.js';
-
-export function defaultsTo(a, defaultValue, conditional) {
-    return a === conditional ? defaultValue : a;
-}
-
-export function replaceAttachments(record) {
-    let attachments = record.doc._attachments;
-    let payload = record.doc.payload;
-
-    if (attachments !== undefined) {
-        Object.keys(attachments).forEach((pathString) => {
-            let path = pathString.split('.');
-            let currentLocation = payload;
-            while (path.length > 1) {
-                currentLocation = currentLocation[path.shift()];
-            }
-            currentLocation[path[0]] = attachments[pathString];
-        });
-    }
-    return payload;
-}
-
-export function extractAttachments(action) {
-    // FIXME - Copying the action may be unnecessary and slow here.
-    let payload = { ...action }, attachments = null;
-
-    if (Array.isArray(action._attachments)) {
-        attachments = {};
-        action._attachments.forEach((pathString) => {
-            let path = pathString.split('.');
-            let currentLocation = payload;
-            while (path.length > 1) {
-                currentLocation = currentLocation[path.shift()];
-            }
-            const lastProp = path[0];
-            const data = currentLocation[lastProp];
-            currentLocation[lastProp] = '_attachment';
-
-            if (data instanceof Blob) {
-                attachments[pathString] = {
-                    'content_type': data.type,
-                    'data': data
-                };
-            } else {
-                // FIXME - Here be dragons
-                attachments[pathString] = {
-                    'content_type': 'text/plain',
-                    'data': data
-                };
-            }
-        });
-        action._attachments = undefined;
-    }
-
-    return {
-        payload,
-        attachments
-    };
-}
+import { FEED_CHANGED } from './constants.js';
+import { defaultsTo } from './utils';
 
 export function persistenceMiddleware(options) {
     var {
-        db,
-        startingSequence,
+        adapter,
         actionFilter,
-        blobSupport,
-        synchronous,
-        actionSuffix
+        synchronous
     } = options;
 
     actionFilter = defaultsTo(actionFilter, (() => false));
-    actionSuffix = defaultsTo(actionSuffix, '-RA');
 
     return (/* store */) => next => {
-        var ignoredActionQueue = [], waitingOnAsyncActions = 0,    sequence = startingSequence;
+        var ignoredActionQueue = [], waitingOnAsyncActions = 0;
 
         return action => {
             if (action.type === FEED_CHANGED) {
@@ -94,23 +32,8 @@ export function persistenceMiddleware(options) {
                 }
             } else {
                 // TODO - detect unserializable actions in DEBUG mode
-                sequence += 1;
-                if (blobSupport) {
-                    var { payload, attachments } = extractAttachments(action);
-                } else {
-                    payload = action;
-                    attachments = null;
-                }
-                let doc = {
-                    _id: sequence.toString(36) + actionSuffix,
-                    type: REDUX_ACTION_TYPE,
-                    payload: payload
-                };
-                if (attachments) {
-                    doc._attachments = attachments;
-                }
                 waitingOnAsyncActions += 1;
-                db.put(doc).catch((err) => {
+                adapter.saveAction(action).catch((err) => {
                     console.log('Could not serialize action: ', action);
                     console.log(err);
                 });
