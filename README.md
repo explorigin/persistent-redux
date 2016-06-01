@@ -33,7 +33,7 @@ const options = {
 ```
 
 #### adapter
-An adapter instance to wrap any storage.  See [Available Adapters] below.
+An adapter instance to wrap any storage.  See [Available Adapters](#available-adapters) below.
 
 #### actionFilter
 
