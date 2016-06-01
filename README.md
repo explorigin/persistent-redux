@@ -26,8 +26,8 @@ import { PouchDBAdapter } from 'persistent-redux/lib/adapters';
 ```es6
 const db = new PouchDB('AppState', {storage: 'persistent'});
 const options = {
-	adapter: new adapters.PouchDBAdapter(db, { blobSupport: true }),
-	actionFilter: ((action) => action.type.indexOf('@@reduxReactRouter') !== 0),
+    adapter: new adapters.PouchDBAdapter(db, { blobSupport: true }),
+    actionFilter: ((action) => action.type.indexOf('@@reduxReactRouter') !== 0),
     synchronous: true,
 };
 ```
@@ -70,7 +70,7 @@ Redux stores application state as a function of `actions` and thus persistent-re
 adapter.squashActions(rootReducer).then(() => {
     // ... successful
 }).catch((err) => {
-  // ... any errors will show up here
+    // ... any errors will show up here
 })
 ```
 
